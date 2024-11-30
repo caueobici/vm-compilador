@@ -45,7 +45,8 @@ void Operations::opLDC(VirtualMachine& vm, Operand& op1, Operand& op2) {
     // Carregar constante
     if (std::holds_alternative<int>(op1)) {
         int k = std::get<int>(op1);
-        vm.stack[++vm.sp] = k;
+        vm.sp++;
+        vm.stack[vm.sp] = k;
     } else {
         throw std::runtime_error("LDC de uma constante inteira");
     }
@@ -55,7 +56,8 @@ void Operations::opLDV(VirtualMachine& vm, Operand& op1, Operand& op2) {
     // Carregar valor de um endereço
     if (std::holds_alternative<int>(op1)) {
         int n = std::get<int>(op1);
-        vm.stack[++vm.sp] = vm.stack[n];
+        vm.sp++;
+        vm.stack[vm.sp] = vm.stack[n];
     } else {
         throw std::runtime_error("LDV precisa de um endereço inteiro");
     }
@@ -63,7 +65,7 @@ void Operations::opLDV(VirtualMachine& vm, Operand& op1, Operand& op2) {
 
 void Operations::opADD(VirtualMachine& vm, Operand& op1, Operand& op2) {
     // Somar os dois últimos valores da pilha
-    if (vm.sp < vm.start_sp+1) {
+    if (vm.sp <= vm.start_sp+1) {
         throw std::runtime_error("Valores insuficientes na stack ADD");
     }
     vm.stack[vm.sp - 1] += vm.stack[vm.sp];
@@ -72,7 +74,7 @@ void Operations::opADD(VirtualMachine& vm, Operand& op1, Operand& op2) {
 
 void Operations::opSUB(VirtualMachine& vm, Operand& op1, Operand& op2) {
     // Subtrair os dois últimos valores da pilha
-    if (vm.sp < vm.start_sp+1) {
+    if (vm.sp <= vm.start_sp+1) {
         throw std::runtime_error("Valores insuficientes na stack SUB");
     }
     vm.stack[vm.sp - 1] -= vm.stack[vm.sp];
@@ -81,7 +83,7 @@ void Operations::opSUB(VirtualMachine& vm, Operand& op1, Operand& op2) {
 
 void Operations::opMULT(VirtualMachine& vm, Operand& op1, Operand& op2) {
     // Multiplicar os dois últimos valores da pilha
-    if (vm.sp < vm.start_sp+1) {
+    if (vm.sp <= vm.start_sp+1) {
         throw std::runtime_error("Valores insuficientes na stack MULT");
     }
     vm.stack[vm.sp - 1] *= vm.stack[vm.sp];
@@ -90,7 +92,7 @@ void Operations::opMULT(VirtualMachine& vm, Operand& op1, Operand& op2) {
 
 void Operations::opDIVI(VirtualMachine& vm, Operand& op1, Operand& op2) {
     // Divisão inteira dos dois últimos valores da pilha
-    if (vm.sp < vm.start_sp+1) {
+    if (vm.sp <= vm.start_sp+1) {
         throw std::runtime_error("Valores insuficientes na stack DIVI");
     }
     if (vm.stack[vm.sp] == 0) {
@@ -107,30 +109,30 @@ void Operations::opINV(VirtualMachine& vm, Operand& op1, Operand& op2) {
 
 void Operations::opAND(VirtualMachine& vm, Operand& op1, Operand& op2) {
     // Conjunção lógica (considerando 0 como falso, qualquer outro valor como verdadeiro)
-    if (vm.sp < vm.start_sp+1) {
+    if (vm.sp <= vm.start_sp+1) {
         throw std::runtime_error("Valores insuficientes na stack AND");
     }
-    vm.stack[vm.sp - 1] = (vm.stack[vm.sp - 1] != 0 && vm.stack[vm.sp] != 0) ? 1 : 0;
+    vm.stack[vm.sp - 1] = (vm.stack[vm.sp - 1] == 1 && vm.stack[vm.sp] == 1) ? 1 : 0;
     vm.sp--;
 }
 
 void Operations::opOR(VirtualMachine& vm, Operand& op1, Operand& op2) {
     // Disjunção lógica
-    if (vm.sp < vm.start_sp+1) {
-        throw std::runtime_error("Valores insuficientes na stack CMEQ");
+    if (vm.sp <= vm.start_sp+1) {
+        throw std::runtime_error("Valores insuficientes na stack OR");
     }
-    vm.stack[vm.sp - 1] = (vm.stack[vm.sp - 1] != 0 || vm.stack[vm.sp] != 0) ? 1 : 0;
+    vm.stack[vm.sp - 1] = (vm.stack[vm.sp - 1] == 1 || vm.stack[vm.sp] == 1) ? 1 : 0;
     vm.sp--;
 }
 
 void Operations::opNEG(VirtualMachine& vm, Operand& op1, Operand& op2) {
-    // Negação lógica (1 se for 0, 0 se for não-zero)
-    vm.stack[vm.sp] = (vm.stack[vm.sp] == 0) ? 1 : 0;
+    // Negação bit
+    vm.stack[vm.sp] = 1 - vm.stack[vm.sp];
 }
 
 void Operations::opCME(VirtualMachine& vm, Operand& op1, Operand& op2) {
     // Comparar menor
-    if (vm.sp < vm.start_sp+1) {
+    if (vm.sp <= vm.start_sp+1) {
         throw std::runtime_error("Valores insuficientes na stack CME");
     }
     vm.stack[vm.sp - 1] = (vm.stack[vm.sp - 1] < vm.stack[vm.sp]) ? 1 : 0;
@@ -139,7 +141,7 @@ void Operations::opCME(VirtualMachine& vm, Operand& op1, Operand& op2) {
 
 void Operations::opCMA(VirtualMachine& vm, Operand& op1, Operand& op2) {
     // Comparar maior
-    if (vm.sp < vm.start_sp+1) {
+    if (vm.sp <= vm.start_sp+1) {
         throw std::runtime_error("Valores insuficientes na stack CMA");
     }
     vm.stack[vm.sp - 1] = (vm.stack[vm.sp - 1] > vm.stack[vm.sp]) ? 1 : 0;
@@ -148,7 +150,7 @@ void Operations::opCMA(VirtualMachine& vm, Operand& op1, Operand& op2) {
 
 void Operations::opCEQ(VirtualMachine& vm, Operand& op1, Operand& op2) {
     // Comparar igualdade
-    if (vm.sp < vm.start_sp+1) {
+    if (vm.sp <= vm.start_sp+1) {
         throw std::runtime_error("Valores insuficientes na stack CEQ");
     }
     vm.stack[vm.sp - 1] = (vm.stack[vm.sp - 1] == vm.stack[vm.sp]) ? 1 : 0;
@@ -157,7 +159,7 @@ void Operations::opCEQ(VirtualMachine& vm, Operand& op1, Operand& op2) {
 
 void Operations::opCDIF(VirtualMachine& vm, Operand& op1, Operand& op2) {
     // Comparar desigualdade
-    if (vm.sp < vm.start_sp+1) {
+    if (vm.sp <= vm.start_sp+1) {
         throw std::runtime_error("Valores insuficientes na stack CDIF");
     }
     vm.stack[vm.sp - 1] = (vm.stack[vm.sp - 1] != vm.stack[vm.sp]) ? 1 : 0;
@@ -166,7 +168,7 @@ void Operations::opCDIF(VirtualMachine& vm, Operand& op1, Operand& op2) {
 
 void Operations::opCMEQ(VirtualMachine& vm, Operand& op1, Operand& op2) {
     // Comparar menor ou igual
-    if (vm.sp < vm.start_sp+1) {
+    if (vm.sp <= vm.start_sp+1) {
         throw std::runtime_error("Valores insuficientes na stack CMEQ");
     }
     vm.stack[vm.sp - 1] = (vm.stack[vm.sp - 1] <= vm.stack[vm.sp]) ? 1 : 0;
@@ -175,7 +177,7 @@ void Operations::opCMEQ(VirtualMachine& vm, Operand& op1, Operand& op2) {
 
 void Operations::opCMAQ(VirtualMachine& vm, Operand& op1, Operand& op2) {
     // Comparar maior ou igual
-    if (vm.sp < vm.start_sp+1) {
+    if (vm.sp <= vm.start_sp+1) {
         throw std::runtime_error("Valores insuficientes na stack CMAQ");
     }
     vm.stack[vm.sp - 1] = (vm.stack[vm.sp - 1] >= vm.stack[vm.sp]) ? 1 : 0;
@@ -203,7 +205,7 @@ void Operations::opJMPF(VirtualMachine& vm, Operand& op1, Operand& op2) {
         int p = vm.label_cache[label];
 
         // Verifica se há valores na pilha
-        if (vm.sp < vm.start_sp) {
+        if (vm.sp <= vm.start_sp) {
             throw std::runtime_error("Stack esta vazia para o JMPF");
         }
         
@@ -264,6 +266,10 @@ void Operations::opRD(VirtualMachine& vm, Operand& op1, Operand& op2) {
     std::cout << "> ";
     std::cin >> var;
 
+    // if (var == 1337){
+    //     vm.debug();
+    // }
+
     vm.sp++;
     vm.stack[vm.sp] = var;
 }
@@ -280,9 +286,7 @@ void Operations::opSTR(VirtualMachine& vm, Operand& op1, Operand& op2) {
     }
     
     int n = std::get<int>(op1);
-    int var = vm.stack[vm.sp];
-
-    vm.stack[n] = var;
+    vm.stack[n] = vm.stack[vm.sp];;
     vm.sp--;
 }
 

@@ -101,7 +101,6 @@ int main(int argc, char* argv[]) {
         // Passo 4: executar o programa
         vm->execute();
         
-
     } catch (const std::exception& ex) {
         std::cerr << "Erro: " << ex.what() << std::endl;
         return 1;

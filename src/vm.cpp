@@ -10,8 +10,8 @@ void VirtualMachine::startVM(const std::vector<Instruction>& instructions) {
     this->instructionMemory = instructions;
 
     // setar os registradores
-    this->start_sp = 0;
-    this->sp = start_sp -1;
+    this->start_sp = -1;
+    this->sp = start_sp;
     this->ip = 0;
 
     // verifica se o programa comeca com a instrucao START
@@ -43,6 +43,9 @@ void VirtualMachine::execute() {
             // std::cout << "Executando operação: " << instr.operation << std::endl;
             if (instr.operation == "HLT"){
                 break;
+            } else if (instr.operation == "DEBUG"){
+                this->debug();
+                continue;
             }
 
             Operation op = Operations::getOperation(instr.operation);
@@ -78,18 +81,8 @@ void VirtualMachine::debug() {
         tempSp--;
     }
     std::cout << "\n";
-    std::cout << "Instruções na memória:\n";
-    for (const auto& instr : this->instructionMemory) {
-        if (instr.label) {
-            std::cout << "Label: " << *instr.label << "\n";
-        }
-        std::cout << "Operation: " << instr.operation << "\n";
-        if (instr.op1) {
-            std::cout << "Op1: " << *instr.op1 << "\n";
-        }
-        if (instr.op2) {
-            std::cout << "Op2: " << *instr.op2 << "\n";
-        }
-        std::cout << "---\n";
-    }
+
+    auto currInst = this->instructionMemory[this->ip];
+    std::cout << currInst.label.value_or("") << " " << currInst.operation << " " << currInst.op1.value_or("") << "," << currInst.op2.value_or("");
+    
 }
