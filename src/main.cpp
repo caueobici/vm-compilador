@@ -6,6 +6,8 @@
 #include <optional>
 #include "vm.hpp"
 
+VirtualMachine* vm; // global
+
 // Função para ler o conteúdo de um arquivo e retorná-lo como string
 std::string readFile(const std::string& filePath) {
     std::ifstream file(filePath);
@@ -79,6 +81,18 @@ void debugInstructions(const std::vector<Instruction>& instructions) {
     }
 }
 
+int defaultReadFn(){
+    int var;
+
+    std::cout << "> ";
+    std::cin >> var;
+
+    return var;
+}
+
+void defaultWriteFn(int var){
+    std::cout << var << "\n";
+}
 
 int main(int argc, char* argv[]) {
     if (argc < 2) {
@@ -95,11 +109,11 @@ int main(int argc, char* argv[]) {
 
 
         // Passo 3: iniciar a VM
-        VirtualMachine* vm = new VirtualMachine();
+        vm = new VirtualMachine();
         vm->startVM(instructions);
 
         // Passo 4: executar o programa
-        vm->execute();
+        vm->execute(defaultReadFn, defaultWriteFn);
         
     } catch (const std::exception& ex) {
         std::cerr << "Erro: " << ex.what() << std::endl;
@@ -107,4 +121,34 @@ int main(int argc, char* argv[]) {
     }
 
     return 0;
+}
+
+
+// FFI functions
+extern "C"{
+    void initVM(char* file_path){
+        std::string fileContent = readFile(file_path);
+
+        // Passo 2: Fazer o parsing das instruções
+        std::vector<Instruction> instructions = parseInstructions(fileContent);
+
+        vm = new VirtualMachine();
+        vm->startVM(instructions);
+    }
+
+    void executeVM(int(*readFn)(), void(*writeFn)(int)){
+        vm->execute(readFn, writeFn);
+    }
+
+    int getVMSp(){
+        return vm->sp;
+    }
+
+    int getVMIp(){
+        return vm->ip;
+    }
+
+    int getVMStack(int sp){
+        return vm->stack[sp];
+    }
 }

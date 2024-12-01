@@ -34,7 +34,10 @@ void VirtualMachine::startVM(const std::vector<Instruction>& instructions) {
 }
 
 // Executar as instruções carregadas
-void VirtualMachine::execute() {
+void VirtualMachine::execute(ReadFn readFn, WriteFn writeFn) {
+    this->readFn = readFn;
+    this->writeFn = writeFn;
+
     while (this->ip < this->instructionMemory.size()) {
         const auto& instr = this->instructionMemory[this->ip];
         this->ip++; // Avançar o Instruction Pointer

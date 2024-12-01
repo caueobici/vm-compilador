@@ -261,21 +261,14 @@ void Operations::opDALLOC(VirtualMachine& vm, Operand& op1, Operand& op2) {
 }
 
 void Operations::opRD(VirtualMachine& vm, Operand& op1, Operand& op2) {
-    int var;
-
-    std::cout << "> ";
-    std::cin >> var;
-
-    // if (var == 1337){
-    //     vm.debug();
-    // }
+    int var = vm.readFn();
 
     vm.sp++;
     vm.stack[vm.sp] = var;
 }
 
 void Operations::opPRN(VirtualMachine& vm, Operand& op1, Operand& op2) {
-    std::cout << vm.stack[vm.sp] << "\n";
+    vm.writeFn(vm.stack[vm.sp]);
     vm.sp--;
 }
 

@@ -4,8 +4,6 @@
 #include <vector>
 #include <array>
 
-#pragma once
-
 // Estrutura para armazenar uma instrução
 struct Instruction {
     std::optional<std::string> label;
@@ -13,6 +11,9 @@ struct Instruction {
     std::optional<std::string> op1;
     std::optional<std::string> op2;
 };
+
+typedef int(*ReadFn)();
+typedef void(*WriteFn)(int);
 
 #ifndef VM_HPP
 #define VM_HPP
@@ -31,8 +32,11 @@ public:
     int sp; // Stack Pointer
     int start_sp;
 
+    ReadFn readFn;
+    WriteFn writeFn;
+
     void startVM(const std::vector<Instruction>& instructions);
-    void execute();
+    void execute(ReadFn, WriteFn);
     void debug(); // Para depuração e visualização do estado interno
     
 };
