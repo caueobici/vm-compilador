@@ -57,7 +57,7 @@ ffi.cdef("""
 if platform == "linux" or platform == "linux2":
     lib = ffi.dlopen("./vm.so")
 elif platform == "win32":
-    lib = ffi.dlopen("./vm.dll")
+    lib = ffi.dlopen("vm.dll")
 
 
 def init_vm(file_path):
